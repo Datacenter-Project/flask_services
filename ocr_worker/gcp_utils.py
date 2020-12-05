@@ -50,7 +50,10 @@ def detect_document_from_file(source_file):
 
     response = client.document_text_detection(image=image)
 
+    texts = []
+
     for page in response.full_text_annotation.pages:
+        page_text = ''
         for block in page.blocks:
             block_text = ''
             print('\nBlock confidence: {}\n'.format(block.confidence))
@@ -75,13 +78,15 @@ def detect_document_from_file(source_file):
             
                 block_text += paragraph_text+' '
             print("Block text:", block_text)
+            page_text += block_text+'\n\n'
+        texts.append(page_text)
 
     if response.error.message:
         raise Exception(
             '{}\nFor more info on error messages, check: '
             'https://cloud.google.com/apis/design/errors'.format(
                 response.error.message))
-
+    return texts
 
 def detect_document(path):
     """Detects document features in an image."""
