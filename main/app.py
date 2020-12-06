@@ -119,7 +119,7 @@ def search():
    try:
       if 'text' in request.args:
          text = request.args.get('text')
-         producer.send(topic=KAFKA_SEARCH_TOPIC, key=text)
+         producer.send(topic=KAFKA_SEARCH_TOPIC, value=text, key=uuid)
          for msg in consumerSearchResponse:
             return Response(response=msg.value, status=200)
       
