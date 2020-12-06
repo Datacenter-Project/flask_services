@@ -1,9 +1,14 @@
 from kafka import KafkaConsumer, KafkaProducer
 import pickle
-import gcp_utils
 import os
 import uuid
 import json
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# import ../db.py
+import constants
+import gcp_utils
 
 KAFKA_GCP_BLOB_TOPIC = os.getenv("KAFKA_GCP_BLOB_TOPIC") or 'gcp_blob'
 BUCKET_NAME = os.getenv("GCP_BUCKET_NAME") or 'datacenter_project_bucket'

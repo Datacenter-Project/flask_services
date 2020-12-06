@@ -30,16 +30,7 @@ for msg in consumer:
     }
 
     res = es.index(index=ES_INDEX, body=doc, refresh=True)
-    
-    # es.indices.refresh(index="test-index")
-
-    # producer.send(topic='gcp_blob_response', 
-    #     key=json.dumps({'uuid': uuid}), 
-    #     value=json.dumps({'success': True}))
 
     producer.send(topic='gcp_ocr_response', 
         key=uuid, 
         value={'success': True})
-
-      
-

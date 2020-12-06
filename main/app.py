@@ -65,16 +65,24 @@ def upload_file():
       blob_name_uuid = str(uuid.uuid4())
       fin = f.stream.read()      
       filename = secure_filename(f.filename)
+      print("filename:", filename)
 
       producer.send(topic=KAFKA_GCP_BLOB_TOPIC, value=fin, key=blob_name_uuid)
+      print("Sent message to GCP blob worker")
+      # .add_callback(on_blob_success)
+
+      # def on_ocr_success():
+      #    pass
+
+      # def on_blob_success():
+      producer.send(topic=KAFKA_OCR_FILE_TOPIC, value=fin, key=blob_name_uuid)
+      print("Sent message to OCR worker")
+      # .add_callback(on_ocr_success)
       
-      print("filename:", filename)
-      
-      producer.send(topic=KAFKA_OCR_FILE_TOPIC, value=fin, key=str(filename))
-      
+     
       response = {
          'success': True,
-         'message': 'Image read and scanned successfully'
+         # 'message': 'Image read and scanned successfully'
       }
 
       return Response(response=json.dumps(response), status=200) 

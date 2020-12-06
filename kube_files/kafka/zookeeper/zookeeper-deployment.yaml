@@ -1,0 +1,30 @@
+apiVersion: apps/v1 #  for k8s versions before 1.9.0 use apps/v1beta2  and before 1.8.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: zookeeper
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  # replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: confluentinc/cp-zookeeper:6.0.0
+        env:
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: '2181'
+        - name: ZOOKEEPER_TICK_TIME
+          value: '2000'
+              
+        # resources:
+        #   requests:
+        #     cpu: 100m
+        #     memory: 400Mi
+        ports:
+        - containerPort: 2181
+---
