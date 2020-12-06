@@ -16,9 +16,12 @@ app = Flask(__name__)
 KAFKA_GCP_BLOB_RESPONSE_TOPIC = os.getenv("KAFKA_GCP_BLOB_RESPONSE_TOPIC") or 'gcp_blob_response'
 KAFKA_OCR_FILE_RESPONSE_TOPIC = os.getenv("KAFKA_OCR_FILE_RESPONSE_TOPIC") or 'gcp_ocr_response'
 KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC = os.getenv("KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC") or 'gcp_grammar_bot_response'
+KAFKA_SEARCH_RESPONSE_TOPIC = os.getenv("KAFKA_SEARCH_RESPONSE_TOPIC") or 'gcp_search_response'
+
 KAFKA_GCP_BLOB_TOPIC = os.getenv("KAFKA_GCP_BLOB_TOPIC") or 'gcp_blob'
 KAFKA_OCR_FILE_TOPIC = os.getenv("KAFKA_OCR_FILE_TOPIC") or 'gcp_ocr'
 KAFKA_GRAMMAR_BOT_TOPIC = os.getenv("KAFKA_GRAMMAR_BOT_FILE_TOPIC") or 'gcp_grammar_bot'
+KAFKA_SEARCH_TOPIC = os.getenv("KAFKA_SEARCH_FILE_TOPIC") or 'gcp_search'
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092', 
    # value_serializer=lambda m: m.encode('utf-8'), 
@@ -34,6 +37,9 @@ consumerOcrResponse = KafkaConsumer(KAFKA_OCR_FILE_RESPONSE_TOPIC,
                         value_deserializer=lambda m: json.loads(m.decode('ascii')))
 
 consumerGrammarbotResponse = KafkaConsumer(KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC, 
+                        bootstrap_servers='localhost:9092')
+
+consumerSearchResponse = KafkaConsumer(KAFKA_SEARCH_RESPONSE_TOPIC, 
                         bootstrap_servers='localhost:9092')
 
 def runConsumersBlobResponse():
@@ -107,6 +113,18 @@ def grammar_check(uuid):
    except:
       print('Something wrong occurred')
 
+@app.route("/search", methods=['GET'])
+def search():
+
+   try:
+      if 'text' in request.args:
+         text = request.args.get('text')
+         producer.send(topic=KAFKA_SEARCH_TOPIC, key=text)
+         for msg in consumerSearchResponse:
+            return Response(response=msg.value, status=200)
+      
+   except:
+      print('Something wrong occurred')
 		
 if __name__ == '__main__':
    thread1 = Thread(target = runConsumersBlobResponse, daemon=True)
