@@ -14,9 +14,11 @@ from threading import Thread
 app = Flask(__name__)
 
 KAFKA_GCP_BLOB_RESPONSE_TOPIC = os.getenv("KAFKA_GCP_BLOB_RESPONSE_TOPIC") or 'gcp_blob_response'
+KAFKA_OCR_FILE_RESPONSE_TOPIC = os.getenv("KAFKA_OCR_FILE_RESPONSE_TOPIC") or 'gcp_ocr_response'
+KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC = os.getenv("KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC") or 'gcp_grammar_bot_response'
 KAFKA_GCP_BLOB_TOPIC = os.getenv("KAFKA_GCP_BLOB_TOPIC") or 'gcp_blob'
 KAFKA_OCR_FILE_TOPIC = os.getenv("KAFKA_OCR_FILE_TOPIC") or 'gcp_ocr'
-KAFKA_OCR_FILE_RESPONSE_TOPIC = os.getenv("KAFKA_OCR_FILE_RESPONSE_TOPIC") or 'gcp_ocr_response'
+KAFKA_GRAMMAR_BOT_TOPIC = os.getenv("KAFKA_GRAMMAR_BOT_FILE_TOPIC") or 'gcp_grammar_bot'
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092', 
    # value_serializer=lambda m: m.encode('utf-8'), 
@@ -30,6 +32,9 @@ consumerBlobResponse = KafkaConsumer(KAFKA_GCP_BLOB_RESPONSE_TOPIC,
 consumerOcrResponse = KafkaConsumer(KAFKA_OCR_FILE_RESPONSE_TOPIC, 
                         bootstrap_servers='localhost:9092',
                         value_deserializer=lambda m: json.loads(m.decode('ascii')))
+
+consumerGrammarbotResponse = KafkaConsumer(KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC, 
+                        bootstrap_servers='localhost:9092')
 
 def runConsumersBlobResponse():
 
@@ -57,10 +62,18 @@ def runConsumersOcrResponse():
       if msg.value['success']:
          print("Image scanned using OCR successfully")
 
-@app.route('/upload', methods = ['POST'])
+# def runConsumersGrammarbotResponse():
+#    for msg in consumerGrammarbotResponse:     
+#       print ("%s:%d:%d: key=%s value=%s" % (msg.topic, msg.partition,
+#                                              msg.offset, msg.key,
+#                                              msg.value)) 
+#       uuid = msg.key      
+#       if msg.value['success']:
+#          print("Grammar check successful")
+
+@app.route('/upload', methods = ['GET','POST'])
 def upload_file():
    try:
-      destination_blob_name = str(uuid.uuid4())
       f = request.files['file']
       blob_name_uuid = str(uuid.uuid4())
       fin = f.stream.read()      
@@ -70,7 +83,7 @@ def upload_file():
       
       print("filename:", filename)
       
-      producer.send(topic=KAFKA_OCR_FILE_TOPIC, value=fin, key=str(filename))
+      producer.send(topic=KAFKA_OCR_FILE_TOPIC, value=fin, key=blob_name_uuid)
       
       response = {
          'success': True,
@@ -80,6 +93,20 @@ def upload_file():
       return Response(response=json.dumps(response), status=200) 
    except:
       print("Something wrong occurred")
+
+@app.route("/grammar/<uuid>", methods=['GET'])
+def grammar_check(uuid):
+
+   try:
+      # if 'uuid' in request.args:
+      #    uuid = request.args.get('uuid')
+      producer.send(topic=KAFKA_GRAMMAR_BOT_TOPIC, key=uuid)
+      for msg in consumerGrammarbotResponse:
+         return Response(response=msg.value, status=200)
+      
+   except:
+      print('Something wrong occurred')
+
 		
 if __name__ == '__main__':
    thread1 = Thread(target = runConsumersBlobResponse, daemon=True)
@@ -87,4 +114,5 @@ if __name__ == '__main__':
    thread2 = Thread(target = runConsumersOcrResponse, daemon=True)
    thread2.start()
    app.run(debug = True, host='0.0.0.0', port=5000)
+
    # print(constants.KAFKA_GCP_BLOB_RESPONSE_TOPIC)
