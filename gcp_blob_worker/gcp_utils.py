@@ -54,6 +54,7 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
             source_blob_name, destination_file_name
         )
     )
+    return blob
 
 if __name__ == "__main__":
     # input_image_path = 'sample_input_image.png'

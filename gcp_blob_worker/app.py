@@ -18,7 +18,9 @@ producer = KafkaProducer(bootstrap_servers='localhost:9092',
    value_serializer=lambda m: json.dumps(m).encode('ascii')
    )
 
-consumer = KafkaConsumer(KAFKA_GCP_BLOB_TOPIC, bootstrap_servers='localhost:9092')
+consumer = KafkaConsumer(KAFKA_GCP_BLOB_TOPIC, 
+# auto_offset_reset='earliest', 
+bootstrap_servers='localhost:9092')
 
 for msg in consumer:
     print('Message key:', msg.key.decode('utf-8'))
