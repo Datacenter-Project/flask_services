@@ -14,6 +14,7 @@ import gcp_utils
 # import cloudstorage
 from flask import send_file
 import sys
+from flask_cors import CORS, cross_origin
 
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -21,6 +22,8 @@ from constants import *
 from google.cloud import logging
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 es = Elasticsearch(
     hosts=[{'host': ES_HOST, 'port': ES_PORT}]    
