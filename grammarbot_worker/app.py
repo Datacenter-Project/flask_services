@@ -22,7 +22,23 @@ producer = KafkaProducer(bootstrap_servers='localhost:9092',
 
 consumer = KafkaConsumer(KAFKA_GRAMMAR_BOT_TOPIC, bootstrap_servers='localhost:9092')
 
+
+from google.cloud import logging
+
+logging_client = logging.Client()
+# logger = logging_client.logger(LOGGER_NAME)
+logging_client.get_default_handler()
+logging_client.setup_logging()
+
+import logging
+
+logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
+
+
+
 for msg in consumer:
+    logging.info("Received a new message in "+str(KAFKA_GRAMMAR_BOT_TOPIC)+" topic in grammarbot worker")
+
     print('Message key:', msg.key.decode('utf-8'))
     uuid = msg.key.decode('utf-8')
 
@@ -34,7 +50,7 @@ for msg in consumer:
             }
         }
     }
-
+    logging.info('Getting the OCR text for the document from Elasticsearch')
     res = es.search(index=ES_INDEX, body=body)
 
     text = quote(res['hits']['hits'][0]['_source']['ocr_text'])
@@ -46,8 +62,13 @@ for msg in consumer:
         'x-rapidapi-host': "grammarbot.p.rapidapi.com"
         }
 
+    logging.info('Sending request to Grammarbot')
+    logging.info('Request body '+json.dumps(payload))
     response = requests.request("POST", url, data=payload, headers=headers)
     print(json.loads(response.text)["matches"])
+
+    logging.info('Sending the message acknowledgement with the response body of the Grammarbot worker')
+
     producer.send(topic=KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC, 
         key=uuid, 
         value=json.loads(response.text)["matches"])
