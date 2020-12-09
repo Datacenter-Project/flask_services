@@ -2,3 +2,4 @@ __pycache__
 .vscode
 flask_ocr_env
 .DS_Store
+*/*key.json

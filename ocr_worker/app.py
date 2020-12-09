@@ -4,22 +4,19 @@ import gcp_utils
 import os
 from elasticsearch import Elasticsearch
 import json
-
-KAFKA_OCR_FILE_TOPIC = os.getenv("KAFKA_IMAGE_FILE_TOPIC") or 'gcp_ocr'
-ES_HOST = os.getenv("ES_HOST") or 'localhost'
-ES_PORT = os.getenv("ES_PORT") or '443'
-ES_INDEX = 'ocr_texts'
+import sys
+from constants import *
 
 es = Elasticsearch(
     # hosts=[{'host': ES_HOST, 'port': ES_PORT}]    
 )
-producer = KafkaProducer(bootstrap_servers='localhost:9092', 
+producer = KafkaProducer(bootstrap_servers=KAFKA_HOST, 
    key_serializer=lambda m: m.encode('utf-8'),
    value_serializer=lambda m: json.dumps(m).encode('ascii'))
-
+print("KAFKA_OCR_FILE_TOPIC", KAFKA_OCR_FILE_TOPIC)
 consumer = KafkaConsumer(KAFKA_OCR_FILE_TOPIC, 
 # auto_offset_reset='earliest', 
-bootstrap_servers='localhost:9092')
+bootstrap_servers=KAFKA_HOST)
 
 for msg in consumer:
     print('Message key:', msg.key.decode('utf-8'))
@@ -33,6 +30,6 @@ for msg in consumer:
 
     res = es.index(index=ES_INDEX, body=doc, refresh=True)
 
-    producer.send(topic='gcp_ocr_response', 
+    producer.send(topic=KAFKA_GCP_OCR_RESPONSE_TOPIC, 
         key=uuid, 
         value={'success': True})
