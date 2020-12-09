@@ -22,6 +22,8 @@ producer = KafkaProducer(bootstrap_servers='localhost:9092',
 
 consumer = KafkaConsumer(KAFKA_GRAMMAR_BOT_TOPIC, bootstrap_servers='localhost:9092')
 
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
+
 for msg in consumer:
     print('Message key:', msg.key.decode('utf-8'))
     uuid = msg.key.decode('utf-8')
@@ -42,7 +44,7 @@ for msg in consumer:
     payload = "text=" + text + "&language=en-US"
     headers = {
         'content-type': "application/x-www-form-urlencoded",
-        'x-rapidapi-key': "14c63f9d86msh74179affcc45362p13eb62jsn91cf19c77826",
+        'x-rapidapi-key': "",
         'x-rapidapi-host': "grammarbot.p.rapidapi.com"
         }
 

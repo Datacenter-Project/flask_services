@@ -13,8 +13,11 @@ import gcp_utils
 # from google.appengine.api import app_identity
 # import cloudstorage
 from flask import send_file
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 BUCKET_NAME = os.getenv("GCP_BUCKET_NAME") or 'datacenter_project_bucket'
 KAFKA_GCP_BLOB_RESPONSE_TOPIC = os.getenv("KAFKA_GCP_BLOB_RESPONSE_TOPIC") or 'gcp_blob_response'
@@ -91,6 +94,7 @@ def runConsumersOcrResponse():
 #          print("Grammar check successful")
 
 @app.route('/upload', methods = ['POST'])
+@cross_origin()
 def upload_file():
    try:
       f = request.files['file']
@@ -120,35 +124,38 @@ def upload_file():
       return Response(response=json.dumps(response), status=200) 
    except:
       print("Something wrong occurred")
+      return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 
-@app.route("/grammar/<uuid>", methods=['GET'])
-def grammar_check(uuid):
+@app.route("/grammar", methods=['GET'])
+@cross_origin()
+def grammar_check():
 
    try:
-      # if 'uuid' in request.args:
-      #    uuid = request.args.get('uuid')
+      if 'uuid' in request.args:
+         uuid = request.args.get('uuid')
       producer.send(topic=KAFKA_GRAMMAR_BOT_TOPIC, key=uuid)
       for msg in consumerGrammarbotResponse:
          return Response(response=msg.value, status=200)
       
    except:
       print('Something wrong occurred')
+      return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 
 @app.route("/search", methods=['GET'])
+@cross_origin()
 def search():
    try:      
       if 'text' in request.args:
          # uuid = str(uuid.uuid4())
-         text = request.args.get('text')
+         text = str(request.args.get('text'))
          # producer.send(topic=KAFKA_SEARCH_TOPIC, value=text, key=uuid)
          # for msg in consumerSearchResponse:
          #    return Response(response=msg.value, status=200)      
-
          body = {
             "query": {
-                  "multi_match": {
-                     "query": text,
-                     "fields": ["ocr_text"]
+                  "query_string": {
+                     "query": "*" + text + "*",
+                     "fields": ["*"]
                   }
             }
          }
@@ -163,6 +170,7 @@ def search():
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 		
 @app.route("/getDocs", methods=['GET'])
+@cross_origin()
 def getDocs():
    try:     
       # print(request.args) 
@@ -193,6 +201,7 @@ def getDocs():
 		
    
 @app.route("/getImage", methods=['GET'])
+@cross_origin()
 def getImage():
    print(request.args)
    try:
