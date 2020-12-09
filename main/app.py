@@ -19,7 +19,6 @@ from flask_cors import CORS, cross_origin
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from constants import *
-from google.cloud import logging
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -49,6 +48,9 @@ consumerGrammarbotResponse = KafkaConsumer(KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC,
 consumerSearchResponse = KafkaConsumer(KAFKA_SEARCH_RESPONSE_TOPIC, 
                         bootstrap_servers=[KAFKA_HOST])
 
+
+from google.cloud import logging
+
 logging_client = logging.Client()
 # logger = logging_client.logger(LOGGER_NAME)
 logging_client.get_default_handler()
@@ -56,8 +58,11 @@ logging_client.setup_logging()
 
 import logging
 
-logging.basicConfig(filename='temp.log', filemode='w', format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
+for handler in logging.root.handlers[:]:
+   logging.root.removeHandler(handler)
 
+# filename='temp.log', filemode='w', 
+logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
 
 # # [START logging_write_log_entry]
 # def write_entry(logger_name):
@@ -158,7 +163,7 @@ def upload_file():
          'success': True,
          # 'message': 'Image read and scanned successfully'
       }
-      logging.info("Sent response back to the client")
+      logging.info("Sending response back to the client")
       return Response(response=json.dumps(response), status=200) 
    except Exception as e:
       print("Something wrong occurred")
@@ -166,15 +171,17 @@ def upload_file():
       logging.error("Something wrong occurred - "+str(e))
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 
-@app.route("/grammar", methods=['GET'])
+@app.route("/grammar/<uuid>", methods=['GET'])
 @cross_origin()
-def grammar_check():
+def grammar_check(uuid):
+   logging.info("Received a request for /grammar/<uuid> endpoint")
 
    try:
       if 'uuid' in request.args:
          uuid = request.args.get('uuid')
       producer.send(topic=KAFKA_GRAMMAR_BOT_TOPIC, key=uuid)
       for msg in consumerGrammarbotResponse:
+         logging.info("Received a new message in GrammarBot response consumer")
          return Response(response=msg.value, status=200)
       
    except Exception as e:
@@ -186,6 +193,8 @@ def grammar_check():
 @app.route("/search", methods=['GET'])
 @cross_origin()
 def search():
+   logging.info("Received a request for /search endpoint")
+
    try:      
       if 'text' in request.args:
          # uuid = str(uuid.uuid4())
@@ -201,22 +210,23 @@ def search():
                   }
             }
          }
-
-         res = es.search(index=ES_INDEX, body=body)
-
-         print(res['hits']['hits'])
+         logging.info("Sending a search request to Elasticsearch")
+         logging.info("Request Body - "+json.dumps(body))
+         res = es.search(index=ES_INDEX, body=body)     
+         logging.info("Sending response back to the client")
          return Response(response=json.dumps(res['hits']['hits']), status=200)      
 
    except Exception as e:
       print('Something wrong occurred')
       print(e)
       logging.error("Something wrong occurred - "+str(e))
-
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 		
 @app.route("/getDocs", methods=['GET'])
 @cross_origin()
 def getDocs():
+   logging.info("Received a request for /getDocs endpoint")
+
    try:     
       # print(request.args) 
       start = 0
@@ -233,10 +243,12 @@ def getDocs():
             "match_all": {}
          }
       }
-
+      logging.info("Sending a search request to Elasticsearch")
+      logging.info("Request Body - "+json.dumps(body))
       res = es.search(index=ES_INDEX, body=body)
-
+      
       # print(res['hits']['hits'])
+      logging.info("Sending response back to the client")
       return Response(response=json.dumps(res['hits']['hits']), status=200)      
 
    except Exception as e:
@@ -249,12 +261,13 @@ def getDocs():
 @app.route("/getImage", methods=['GET'])
 @cross_origin()
 def getImage():
-   print(request.args)
+   logging.info("Received a request for /getImage endpoint")   
    try:
       if 'uuid' in request.args:
          image_uuid = request.args.get('uuid')
          gcp_utils.download_blob(BUCKET_NAME, image_uuid, 'main/temp.png')
          # f_out = open('main/temp.png')
+         logging.info("Sending response back to the client")
          return send_file('temp.png', mimetype='image/gif')
    except Exception as e:
       print("Something wrong occurred")
@@ -269,5 +282,3 @@ if __name__ == '__main__':
    thread2 = Thread(target = runConsumersOcrResponse, daemon=True)
    thread2.start()
    app.run(debug = True, host='0.0.0.0', port=5010)
-
-   # print(constants.KAFKA_GCP_BLOB_RESPONSE_TOPIC)
