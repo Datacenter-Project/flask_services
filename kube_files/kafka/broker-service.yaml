@@ -5,7 +5,7 @@ metadata:
   labels:
     app: broker
 spec:
-  type: NodePort
+  # type: NodePort
   ports:
     - name: "port1"
       protocol: "TCP"
