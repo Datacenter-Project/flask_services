@@ -3,3 +3,4 @@ __pycache__
 flask_ocr_env
 .DS_Store
 */*key.json
+py2_env/
