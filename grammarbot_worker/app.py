@@ -34,7 +34,7 @@ import logging
 
 logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
 
-
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
 
 for msg in consumer:
     logging.info("Received a new message in "+str(KAFKA_GRAMMAR_BOT_TOPIC)+" topic in grammarbot worker")
@@ -58,7 +58,7 @@ for msg in consumer:
     payload = "text=" + text + "&language=en-US"
     headers = {
         'content-type': "application/x-www-form-urlencoded",
-        'x-rapidapi-key': "14c63f9d86msh74179affcc45362p13eb62jsn91cf19c77826",
+        'x-rapidapi-key': "",
         'x-rapidapi-host': "grammarbot.p.rapidapi.com"
         }
 

@@ -131,6 +131,7 @@ def runConsumersOcrResponse():
 #          print("Grammar check successful")
 
 @app.route('/upload', methods = ['POST'])
+@cross_origin()
 def upload_file():
    logging.info("Received a request for /upload endpoint")
    try:
@@ -168,12 +169,13 @@ def upload_file():
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 
 @app.route("/grammar/<uuid>", methods=['GET'])
+@cross_origin()
 def grammar_check(uuid):
    logging.info("Received a request for /grammar/<uuid> endpoint")
 
    try:
-      # if 'uuid' in request.args:
-      #    uuid = request.args.get('uuid')
+      if 'uuid' in request.args:
+         uuid = request.args.get('uuid')
       producer.send(topic=KAFKA_GRAMMAR_BOT_TOPIC, key=uuid)
       for msg in consumerGrammarbotResponse:
          logging.info("Received a new message in GrammarBot response consumer")
@@ -186,22 +188,22 @@ def grammar_check(uuid):
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 
 @app.route("/search", methods=['GET'])
+@cross_origin()
 def search():
    logging.info("Received a request for /search endpoint")
 
    try:      
       if 'text' in request.args:
          # uuid = str(uuid.uuid4())
-         text = request.args.get('text')
+         text = str(request.args.get('text'))
          # producer.send(topic=KAFKA_SEARCH_TOPIC, value=text, key=uuid)
          # for msg in consumerSearchResponse:
          #    return Response(response=msg.value, status=200)      
-
          body = {
             "query": {
-                  "multi_match": {
-                     "query": text,
-                     "fields": ["ocr_text"]
+                  "query_string": {
+                     "query": "*" + text + "*",
+                     "fields": ["*"]
                   }
             }
          }
@@ -218,6 +220,7 @@ def search():
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 		
 @app.route("/getDocs", methods=['GET'])
+@cross_origin()
 def getDocs():
    logging.info("Received a request for /getDocs endpoint")
 
@@ -253,6 +256,7 @@ def getDocs():
    
 
 @app.route("/getImage", methods=['GET'])
+@cross_origin()
 def getImage():
    logging.info("Received a request for /getImage endpoint")   
    try:
