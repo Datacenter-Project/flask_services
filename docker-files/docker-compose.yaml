@@ -68,7 +68,7 @@ services:
   #   image: madhuaithal/gcp_blob_worker
   #   container_name: gcp_blob_worker
   #   ports:
-  #     - 5000:5000
+  #     - 5010:5000
   #   depends_on:
   #     - broker
   #   volumes:
@@ -82,7 +82,7 @@ services:
   #   image: madhuaithal/ocr_worker
   #   container_name: ocr_worker
   #   ports:
-  #     - 5000:5000
+  #     - 5020:5000
   #   depends_on:
   #     - broker
   #   volumes:
@@ -96,7 +96,7 @@ services:
   #   image: madhuaithal/grammarbot_worker
   #   container_name: grammarbot_worker
   #   ports:
-  #     - 5000:5000
+  #     - 5030:5000
   #   depends_on:
   #     - broker
   #   volumes:
