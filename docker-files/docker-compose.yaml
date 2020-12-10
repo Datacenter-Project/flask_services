@@ -48,57 +48,64 @@ services:
     ports:
       - 5601:5601
     environment:      
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200  
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.0
-    container_name: kibana
-    ports:
-      - 5601:5601
-    environment:      
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+  # main:
+  #   image: madhuaithal/main_service
+  #   container_name: main
+  #   ports:
+  #     - 5000:5000
+  #   depends_on:
+  #     - broker
+  #   volumes:
+  #     - ./custom_project_key.json:/app/key.json
+  #   environment:      
+  #     ES_HOST: elasticsearch
+  #     KAFKA_HOST: broker:9092
+  #     GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
 
-  main:
-    image: madhuaithal/main_service
-    container_name: main
-    ports:
-      - 5000:5000
-    depends_on:
-      - broker
-    volumes:
-      - ./custom_project_key.json:/app/key.json
-    environment:      
-      ES_HOST: elasticsearch
-      KAFKA_HOST: broker:9092
-      GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
-
-  gcp_blob_worker:
-    image: madhuaithal/gcp_blob_worker
-    container_name: gcp_blob_worker
-    ports:
-      - 5000:5000
-    depends_on:
-      - broker
-    volumes:
-      - ./custom_project_key.json:/app/key.json
-    environment:      
-      ES_HOST: elasticsearch
-      KAFKA_HOST: broker:9092
-      GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
+  # gcp_blob_worker:
+  #   image: madhuaithal/gcp_blob_worker
+  #   container_name: gcp_blob_worker
+  #   ports:
+  #     - 5010:5000
+  #   depends_on:
+  #     - broker
+  #   volumes:
+  #     - ./custom_project_key.json:/app/key.json
+  #   environment:      
+  #     ES_HOST: elasticsearch
+  #     KAFKA_HOST: broker:9092
+  #     GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
       
-  ocr_worker:
-    image: madhuaithal/ocr_worker
-    container_name: ocr_worker
-    ports:
-      - 5000:5000
-    depends_on:
-      - broker
-    volumes:
-      - ./custom_project_key.json:/app/key.json
-    environment:      
-      ES_HOST: elasticsearch
-      KAFKA_HOST: broker:9092
-      GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
+  # ocr_worker:
+  #   image: madhuaithal/ocr_worker
+  #   container_name: ocr_worker
+  #   ports:
+  #     - 5020:5000
+  #   depends_on:
+  #     - broker
+  #   volumes:
+  #     - ./custom_project_key.json:/app/key.json
+  #   environment:      
+  #     ES_HOST: elasticsearch
+  #     KAFKA_HOST: broker:9092
+  #     GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
+
+  # grammarbot_worker:
+  #   image: madhuaithal/grammarbot_worker
+  #   container_name: grammarbot_worker
+  #   ports:
+  #     - 5030:5000
+  #   depends_on:
+  #     - broker
+  #   volumes:
+  #     - ./custom_project_key.json:/app/key.json
+  #   environment:      
+  #     ES_HOST: elasticsearch
+  #     KAFKA_HOST: broker:9092
+  #     GOOGLE_APPLICATION_CREDENTIALS: /app/key.json
+  #     RAPIDAPI_KEY: 27c67208e4mshe21c247ea2b05a2p11ba4ajsn2730a303bcce
 
   # schema-registry:
   #   image: confluentinc/cp-schema-registry:6.0.0

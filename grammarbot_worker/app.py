@@ -57,7 +57,7 @@ for msg in consumer:
     payload = "text=" + text + "&language=en-US"
     headers = {
         'content-type': "application/x-www-form-urlencoded",
-        'x-rapidapi-key': '',
+        'x-rapidapi-key': RAPIDAPI_KEY,
         'x-rapidapi-host': "grammarbot.p.rapidapi.com"
     }
 

@@ -43,4 +43,4 @@ for message in consumer2:
 #                           group_id='my-group',
 #                           bootstrap_servers='my.server.com')
 
-consumer2.close()
+# consumer2.close()
