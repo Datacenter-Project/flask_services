@@ -31,8 +31,18 @@ import json
 producer = KafkaProducer(bootstrap_servers='localhost:9092',
     value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
+
+def on_send_success(record_metadata):
+    print(record_metadata.topic)
+    print(record_metadata.partition)
+    print(record_metadata.offset)
+
+def on_send_error(excp):
+    print('I am an errback', exc_info=excp)
+    # handle exception
 print(producer.bootstrap_connected())
-producer.send('json-topic', {'key': 'value'})
+producer.send('json-topic', {'key': 'value'}).add_callback(on_send_success).add_errback(on_send_error)
+
 
 # # produce asynchronously
 # for _ in range(100):
@@ -51,7 +61,7 @@ producer.send('json-topic', {'key': 'value'})
 # producer.send('my-topic', b'raw_bytes').add_callback(on_send_success).add_errback(on_send_error)
 
 # # block until all async messages are sent
-producer.flush()
-producer.close()
+# producer.flush()
+# producer.close()
 # # configure multiple retries
 # producer = KafkaProducer(retries=5)
