@@ -171,9 +171,9 @@ def upload_file():
       logging.error("Something wrong occurred - "+str(e))
       return Response(response=json.dumps({'success':False, 'message':'Something wrong occurred'}), status=500)
 
-@app.route("/grammar/<uuid>", methods=['GET'])
+@app.route("/grammar", methods=['GET'])
 @cross_origin()
-def grammar_check(uuid):
+def grammar_check():
    logging.info("Received a request for /grammar/<uuid> endpoint")
 
    try:
@@ -281,4 +281,4 @@ if __name__ == '__main__':
    thread1.start()
    thread2 = Thread(target = runConsumersOcrResponse, daemon=True)
    thread2.start()
-   app.run(debug = True, host='0.0.0.0', port=5010)
+   app.run(debug = True, host='0.0.0.0', port=5000)
