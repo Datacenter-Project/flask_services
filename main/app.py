@@ -58,11 +58,11 @@ logging_client.setup_logging()
 
 import logging
 
-for handler in logging.root.handlers[:]:
-   logging.root.removeHandler(handler)
+# for handler in logging.root.handlers[:]:
+#    logging.root.removeHandler(handler)
 
 # filename='temp.log', filemode='w', 
-logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)
 
 # # [START logging_write_log_entry]
 # def write_entry(logger_name):
@@ -281,4 +281,4 @@ if __name__ == '__main__':
    thread1.start()
    thread2 = Thread(target = runConsumersOcrResponse, daemon=True)
    thread2.start()
-   app.run(debug = True, host='0.0.0.0', port=5000)
+   app.run(debug = False, host='0.0.0.0', port=5000)

@@ -1,4 +1,4 @@
-from urllib import quote
+from urllib.parse import quote
 import requests
 import json
 from kafka import KafkaConsumer, KafkaProducer
@@ -6,7 +6,7 @@ import os
 from elasticsearch import Elasticsearch
 import json
 # from flask import jsonify
-from bson import json_util
+# from bson import json_util
 KAFKA_GRAMMAR_BOT_TOPIC = os.getenv("KAFKA_GRAMMAR_BOT_FILE_TOPIC") or 'gcp_grammar_bot'
 KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC = os.getenv("KAFKA_GRAMMAR_BOT_RESPONSE_TOPIC") or 'gcp_grammar_bot_response'
 ES_HOST = os.getenv("ES_HOST") or 'localhost'
@@ -21,7 +21,6 @@ producer = KafkaProducer(bootstrap_servers='localhost:9092',
    value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
 consumer = KafkaConsumer(KAFKA_GRAMMAR_BOT_TOPIC, bootstrap_servers='localhost:9092')
-
 
 from google.cloud import logging
 
@@ -58,14 +57,14 @@ for msg in consumer:
     payload = "text=" + text + "&language=en-US"
     headers = {
         'content-type': "application/x-www-form-urlencoded",
-        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-key': '',
         'x-rapidapi-host': "grammarbot.p.rapidapi.com"
     }
 
     logging.info('Sending request to Grammarbot')
     logging.info('Request body '+json.dumps(payload))
     response = requests.request("POST", url, data=payload, headers=headers)
-    print(json.loads(response.text)["matches"])
+    # print(json.loads(response.text)["matches"])
 
     logging.info('Sending the message acknowledgement with the response body of the Grammarbot worker')
 
